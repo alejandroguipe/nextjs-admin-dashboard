@@ -9,6 +9,7 @@ import useUserProfile from "@/hooks/useUserProfile";
 import { useAuth } from "@/context/AuthContext";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
+import { toast } from "react-toastify";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -21,6 +22,7 @@ export default function UserInfoCard() {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
     await setDoc(doc(db, "users", user.uid), data, { merge: true });
+    toast.success("Profile updated");
     closeModal();
   };
   return (
