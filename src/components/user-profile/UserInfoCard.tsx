@@ -7,7 +7,7 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import useUserProfile from "@/hooks/useUserProfile";
 import { useAuth } from "@/context/AuthContext";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 
 export default function UserInfoCard() {
@@ -20,7 +20,7 @@ export default function UserInfoCard() {
     if (!user) return;
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    await updateDoc(doc(db, "users", user.uid), data, { merge: true });
+    await setDoc(doc(db, "users", user.uid), data, { merge: true });
     closeModal();
   };
   return (

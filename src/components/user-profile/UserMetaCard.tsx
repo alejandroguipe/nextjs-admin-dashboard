@@ -8,7 +8,7 @@ import Label from "../form/Label";
 import Image from "next/image";
 import useUserProfile from "@/hooks/useUserProfile";
 import { useAuth } from "@/context/AuthContext";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 
 
@@ -21,7 +21,7 @@ export default function UserMetaCard() {
     if (!user) return;
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    await updateDoc(doc(db, "users", user.uid), data, { merge: true });
+    await setDoc(doc(db, "users", user.uid), data, { merge: true });
     closeModal();
   };
   return (
