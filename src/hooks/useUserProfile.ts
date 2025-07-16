@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -28,7 +28,16 @@ export default function useUserProfile() {
         const snap = await getDoc(ref);
         if (snap.exists()) {
           setProfile(snap.data() as UserProfile);
+        } else {
+          const data: UserProfile = {
+            email: user.email ?? "",
+            photoURL: user.photoURL ?? "",
+          };
+          await setDoc(ref, data);
+          setProfile(data);
         }
+      } else {
+        setProfile(null);
       }
     }
     load();
