@@ -6,13 +6,21 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import useUserProfile from "@/hooks/useUserProfile";
+import { useAuth } from "@/context/AuthContext";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
   const profile = useUserProfile();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
+  const { user } = useAuth();
+
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user) return;
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+    await updateDoc(doc(db, "users", user.uid), data, { merge: true });
     closeModal();
   };
   return (
@@ -104,7 +112,7 @@ export default function UserInfoCard() {
               Update your details to keep your profile up-to-date.
             </p>
           </div>
-          <form className="flex flex-col">
+          <form className="flex flex-col" onSubmit={handleSave}>
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
               <div>
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
@@ -116,19 +124,21 @@ export default function UserInfoCard() {
                     <Label>Facebook</Label>
                     <Input
                       type="text"
+                      name="facebook"
                       defaultValue="https://www.facebook.com/PimjoHQ"
                     />
                   </div>
 
                   <div>
                     <Label>X.com</Label>
-                    <Input type="text" defaultValue="https://x.com/PimjoHQ" />
+                    <Input type="text" name="twitter" defaultValue="https://x.com/PimjoHQ" />
                   </div>
 
                   <div>
                     <Label>Linkedin</Label>
                     <Input
                       type="text"
+                      name="linkedin"
                       defaultValue="https://www.linkedin.com/company/pimjo"
                     />
                   </div>
@@ -137,6 +147,7 @@ export default function UserInfoCard() {
                     <Label>Instagram</Label>
                     <Input
                       type="text"
+                      name="instagram"
                       defaultValue="https://instagram.com/PimjoHQ"
                     />
                   </div>
@@ -150,27 +161,27 @@ export default function UserInfoCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label>First Name</Label>
-                    <Input type="text" defaultValue={profile?.firstName ?? ""} />
+                    <Input name="firstName" type="text" defaultValue={profile?.firstName ?? ""} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Last Name</Label>
-                    <Input type="text" defaultValue={profile?.lastName ?? ""} />
+                    <Input name="lastName" type="text" defaultValue={profile?.lastName ?? ""} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" defaultValue={profile?.email ?? ""} />
+                    <Input name="email" type="text" defaultValue={profile?.email ?? ""} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
-                    <Input type="text" defaultValue={profile?.phone ?? ""} />
+                    <Input name="phone" type="text" defaultValue={profile?.phone ?? ""} />
                   </div>
 
                   <div className="col-span-2">
                     <Label>Bio</Label>
-                    <Input type="text" defaultValue={profile?.bio ?? ""} />
+                    <Input name="bio" type="text" defaultValue={profile?.bio ?? ""} />
                   </div>
                 </div>
               </div>
@@ -179,7 +190,7 @@ export default function UserInfoCard() {
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
+              <Button size="sm" type="submit">
                 Save Changes
               </Button>
             </div>

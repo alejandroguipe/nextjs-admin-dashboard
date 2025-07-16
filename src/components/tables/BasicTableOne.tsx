@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,6 +9,8 @@ import {
 
 import Badge from "../ui/badge/Badge";
 import Image from "next/image";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase";
 
 interface Order {
   id: number;
@@ -23,6 +25,13 @@ interface Order {
   };
   status: string;
   budget: string;
+}
+
+interface UserRow {
+  id: string;
+  name: string;
+  email: string;
+  role?: string;
 }
 
 // Define the table data using the interface
@@ -112,6 +121,21 @@ const tableData: Order[] = [
 ];
 
 export default function BasicTableOne() {
+  const [users, setUsers] = useState<UserRow[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const snap = await getDocs(collection(db, "users"));
+      const rows = snap.docs.map((d) => ({
+        id: d.id,
+        name: `${d.data().firstName ?? ""} ${d.data().lastName ?? ""}`.trim(),
+        email: d.data().email ?? "",
+        role: d.data().role ?? "",
+      }));
+      setUsers(rows);
+    }
+    load();
+  }, []);
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
@@ -219,6 +243,40 @@ export default function BasicTableOne() {
               ))}
             </TableBody>
           </Table>
+          {users.length > 0 && (
+            <div className="mt-8">
+              <Table>
+                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                  <TableRow>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                      Name
+                    </TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                      Email
+                    </TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                      Role
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                  {users.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="px-5 py-3 text-start text-theme-sm text-gray-800 dark:text-white/90">
+                        {u.name}
+                      </TableCell>
+                      <TableCell className="px-5 py-3 text-start text-theme-sm text-gray-500 dark:text-gray-400">
+                        {u.email}
+                      </TableCell>
+                      <TableCell className="px-5 py-3 text-start text-theme-sm text-gray-500 dark:text-gray-400">
+                        {u.role || "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </div>
       </div>
     </div>
