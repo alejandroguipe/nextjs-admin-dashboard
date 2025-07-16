@@ -2,7 +2,6 @@
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -13,7 +12,8 @@ import { useRouter } from "next/navigation";
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""
+  );
   const [password, setPassword] = useState("");
   const router = useRouter();
 
@@ -126,11 +126,15 @@ export default function SignInForm() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
                     >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
-                      )}
+   {showPassword ? (
+  <span className="fill-gray-500 dark:fill-gray-400">
+    <EyeIcon />
+  </span>
+) : (
+  <span className="fill-gray-500 dark:fill-gray-400">
+    <EyeCloseIcon />
+  </span>
+)}
                     </span>
                   </div>
                 </div>
@@ -149,9 +153,11 @@ export default function SignInForm() {
                   </Link>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm" type="submit">
-                    Sign in
-                  </Button>
+                <div>
+  <button className="w-full btn-sm" type="submit">
+    Sign in
+  </button>
+</div>
                 </div>
               </div>
             </form>
