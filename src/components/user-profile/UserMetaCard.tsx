@@ -9,7 +9,9 @@ import Image from "next/image";
 import useUserProfile from "@/hooks/useUserProfile";
 import { useAuth } from "@/context/AuthContext";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "@/firebase";
+import { db, storage } from "@/firebase";
+import { toast } from "react-toastify";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 
 export default function UserMetaCard() {
@@ -19,9 +21,22 @@ export default function UserMetaCard() {
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
+
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const file = formData.get("photo") as File | null;
+    if (file) {
+      formData.delete("photo");
+    }
+    const data: Record<string, unknown> = Object.fromEntries(formData.entries());
+
+    if (file && file.size > 0) {
+      const storageRef = ref(storage, `users/${user.uid}/profile-${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      data.photoURL = await getDownloadURL(storageRef);
+    }
+
     await setDoc(doc(db, "users", user.uid), data, { merge: true });
+    toast.success("Profile updated");
     closeModal();
   };
   return (
@@ -220,8 +235,8 @@ export default function UserMetaCard() {
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Photo URL</Label>
-                    <Input name="photoURL" type="text" defaultValue={profile?.photoURL ?? ""} />
+                    <Label>Photo</Label>
+                    <Input name="photo" type="file" />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">

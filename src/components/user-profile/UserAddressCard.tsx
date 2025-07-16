@@ -6,13 +6,22 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import useUserProfile from "@/hooks/useUserProfile";
+import { useAuth } from "@/context/AuthContext";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/firebase";
+import { toast } from "react-toastify";
 
 export default function UserAddressCard() {
   const { isOpen, openModal, closeModal } = useModal();
   const profile = useUserProfile();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
+  const { user } = useAuth();
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user) return;
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+    await setDoc(doc(db, "users", user.uid), data, { merge: true });
+    toast.success("Address updated");
     closeModal();
   };
   return (
@@ -96,27 +105,27 @@ export default function UserAddressCard() {
               Update your details to keep your profile up-to-date.
             </p>
           </div>
-          <form className="flex flex-col">
+          <form className="flex flex-col" onSubmit={handleSave}>
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Country</Label>
-                  <Input type="text" defaultValue={profile?.country ?? ""} />
+                  <Input name="country" type="text" defaultValue={profile?.country ?? ""} />
                 </div>
 
                 <div>
                   <Label>City/State</Label>
-                  <Input type="text" defaultValue={profile?.city ?? ""} />
+                  <Input name="city" type="text" defaultValue={profile?.city ?? ""} />
                 </div>
 
                 <div>
                   <Label>Postal Code</Label>
-                  <Input type="text" defaultValue={profile?.postalCode ?? ""} />
+                  <Input name="postalCode" type="text" defaultValue={profile?.postalCode ?? ""} />
                 </div>
 
                 <div>
                   <Label>TAX ID</Label>
-                  <Input type="text" defaultValue={profile?.taxId ?? ""} />
+                  <Input name="taxId" type="text" defaultValue={profile?.taxId ?? ""} />
                 </div>
               </div>
             </div>
@@ -124,7 +133,7 @@ export default function UserAddressCard() {
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
+              <Button size="sm" type="submit">
                 Save Changes
               </Button>
             </div>
